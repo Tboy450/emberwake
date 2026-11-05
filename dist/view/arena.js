@@ -37,7 +37,7 @@ export function buildArena(scene,node){
    mesh(new T.CylinderGeometry(.14,.28,h,6),bark,x,h/2,z);
    for(let tier=0;tier<2;tier++)mesh(new T.ConeGeometry(1.1-tier*.2,h*.75,7),leaf,x,h*.7+tier*.45,z);
   }
-  const x=side*6.8,z=4.2;
+  const x=side*5.3,z=4.2;
   mesh(new T.CylinderGeometry(.09,.14,1.7,6),dark,x,.85,z);
   mesh(new T.BoxGeometry(.55,.12,.55),stone,x,1.8,z);
   mesh(new T.BoxGeometry(.28,.5,.28),material(p.light,{emissive:p.light,emissiveIntensity:2}),x,1.47,z);
