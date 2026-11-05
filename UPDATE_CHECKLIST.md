@@ -14,6 +14,13 @@ Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier 
 
 ## Completed in this batch
 
+- [x] Replace the single-row field with staggered formations, a clear attack lane and stronger target-facing release poses.
+- [x] Perspective arena with a receding stone road, ruins, trees, foreground lanterns, contact shadows and regional colors.
+- [x] Compensate character scale for camera depth; test front/rear apparent height and projected silhouette clearance.
+- [x] Load the fireball sheet before enabling animation, fixing the first-cast empty-texture warning.
+- [x] Music for towns/travel/battles, crossfades, master mute, independent saved volume controls and lazy user-initiated playback.
+- [x] Transfer retained CC0 audio credits/notices; verify original music hashes.
+- [x] Current verification: 59 JavaScript tests, five Python recovery tests; held-pose visual fixtures, full-party/dragon staging, actual Sunshard/Iron vigil turns, desktop/phone audio controls and volume persistence.
 - [x] Facing adjustment: remove the enemy mirror that pointed bat/dragon art away; angle both formations inward.
 - [x] Fit spacing to actual sprite widths, add a wider central aisle and refit the camera for larger formations.
 - [x] Quick spin before strikes/spells, ending toward the target; reduced motion skips the spin. Flee does not play an attack.
@@ -37,10 +44,10 @@ Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier 
 - [ ] Broader battle checks: three allies, all enemy types, AoE, revival, flee, win/defeat, pause, reduced motion and context loss.
 - [ ] Ensure all displayed enemy art fits its name and story; current mappings are provisional.
 - [ ] Complete GLTFLoader dependencies before using imported GLB scenery; unused loader is not part of the adapter.
-- [ ] Region-specific staged scenery and more individual attacks; current arena is deliberately simple.
-- [ ] Music and effects playback with independent saved volume/mute controls, lazy loads and crossfade.
+- [ ] Refine regional scenery and individual attacks further; code-built regional arenas now work. Side/back character artwork is still absent; the renderer uses stronger three-quarter poses over supplied front art.
+- [x] Music and effects playback with independent saved volume/mute controls, lazy loads and crossfade.
 - [ ] Menu icons for additional real loot; do not imply the 51 imported icons are all implemented items.
-- [ ] Carry original source/license notices into public asset credits before adding further packs.
+- [x] Carry retained RPG artwork credits and CC0 sound/music notices into public credits; trace any still-unknown gear/dragon source notices before adding further packs.
 - [ ] Verify full asset regeneration from the original archive; failure/rollback paths are tested.
 
 ## Later systems pass, separate from graphics

@@ -59,6 +59,7 @@ export class Stage {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.width = w; this.height = h;
+    this.view?.resize?.(w,h);
   }
 
   frame(dt) {

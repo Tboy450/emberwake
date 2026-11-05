@@ -123,7 +123,7 @@ function heightField(img, cols, rows, emboss) {
     const lum = (px[i * 4] * .3 + px[i * 4 + 1] * .59 + px[i * 4 + 2] * .11) / 255;
     h[i] = Math.sqrt(1 - (1 - k) ** 2) + (lum - .4) * emboss;
   }
-  for (let pass = 0; pass < 2; pass++) {
+  for (let pass = 0; pass < 4; pass++) {
     const o = new Float32Array(n);
     for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
       let s = 0, m = 0;
@@ -150,7 +150,7 @@ async function relief(art, height, depth) {
     const rows = 104, cols = Math.max(24, Math.round(rows * aspect));
     const geo = new THREE.PlaneGeometry(w, height, cols - 1, rows - 1);
     geo.translate(0, height / 2, 0);
-    const field = heightField(img, cols, rows, .22), pos = geo.attributes.position;
+    const field = heightField(img, cols, rows, .04), pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) pos.setZ(i, field[i] * depth * Math.min(w, height));
     geo.computeVertexNormals();
     return {geo, map, w, h: height};
@@ -163,7 +163,8 @@ export class Actor {
   static async create(art, opts = {}) {
     const rig = RIGS[art] || {h: 2, depth: .3, bones: []};
     const height = (opts.h || rig.h) * (opts.scale || 1);
-    const r = await relief(art, height, rig.depth);
+    const profile = !['crystal_bat','dragon','drake_hatchling'].includes(art);
+    const r = await relief(art, height, profile?rig.depth*1.08:rig.depth);
     return new Actor(art, rig, r, opts);
   }
 
@@ -198,6 +199,7 @@ export class Actor {
     this.phase = Math.random() * 6.28;
     this.alive = true;
     this.status = null;
+    this.profile = !['crystal_bat','dragon','drake_hatchling'].includes(art);
   }
 
   place(x, y, z, yaw = 0) {
@@ -207,6 +209,18 @@ export class Actor {
   }
 
   boneIndex(name) { return this.rig.bones.findIndex(b => b.name === name); }
+
+  face(yaw){
+    this.heading=yaw;
+    // Humanoids point their depth volume at the target. Directional creature
+    // paintings use their supplied left profile and mirror only when facing right.
+    if(this.profile){
+      // A supplied front painting has no back/profile frames. Keep its face
+      // visible in a strong three-quarter view while its heading tracks the target.
+      this.group.rotation.y=Math.sign(Math.sin(yaw))*1.08;this.mesh.scale.x=this.flip;
+    }
+    else{this.group.rotation.y=0;this.mesh.scale.x=Math.sin(yaw)>0?-1:1;}
+  }
 
   update(dt, t) {
     const {u, rig, pose} = this;

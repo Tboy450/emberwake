@@ -9,3 +9,8 @@
 @media(max-width:700px){.story-choices{grid-template-columns:1fr}.story-scene{gap:20px}.story-scene header h2{font-size:28px}.dialogue-line p{font-size:16px}.dialogue{padding-left:14px}.story-choice{padding:15px 27px 15px 15px}.roadmap{grid-template-columns:1fr 1fr;gap:0 12px}.roadmap-stop b{font-size:13px}.battle-party-strip{display:flex;gap:7px;margin-bottom:12px}.journey-thread>div{min-width:0;flex-basis:100%}.journey-thread .route-button{white-space:normal;text-align:left}}
 
 .menu-icon{width:40px;height:40px;object-fit:contain;flex:0 0 40px;image-rendering:auto}.item-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.item-title .coin{margin-left:auto}.top-controls{flex-wrap:wrap}#battle-3d{width:100%;height:auto;aspect-ratio:16/9}#battle-view-status{color:var(--muted);font:9px var(--mono)}@media(max-width:700px){.top-controls{max-width:160px;justify-content:flex-end}.menu-icon{width:34px;height:34px;flex-basis:34px}#graphics{font-size:8px}}
+
+/* Keep the complete arena above target cards at every width. */
+.stage.battle-mode{aspect-ratio:auto;padding-bottom:86px}.stage.battle-mode #battle-3d{height:auto;aspect-ratio:16/10}
+
+.audio-settings{display:grid;gap:12px;margin:20px 0}.audio-settings label{display:flex;justify-content:space-between;gap:12px}.audio-settings .audio-master{justify-content:flex-start;align-items:center}.audio-settings input[type=range]{width:100%;accent-color:var(--amber)}.audio-settings output{font:12px var(--mono);color:var(--amber)}

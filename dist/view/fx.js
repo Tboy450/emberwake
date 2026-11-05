@@ -10,6 +10,11 @@ const SHEETS = {
 };
 const loader = new THREE.TextureLoader();
 const textures = new Map();
+let battleEffects;
+export function loadBattleEffects(){
+ if(!battleEffects)battleEffects=loader.loadAsync('assets/fx/fireball.webp').then(t=>{t.colorSpace=THREE.SRGBColorSpace;textures.set('fireball',t);}).catch(error=>{battleEffects=null;throw error;});
+ return battleEffects;
+}
 function sheetTexture(name) {
   if (!textures.has(name)) {
     const t = loader.load(`assets/fx/${name}.webp`);

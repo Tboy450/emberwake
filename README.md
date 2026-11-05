@@ -11,6 +11,8 @@ A browser RPG about a lantern mage crossing a kingdom without dawn. Explore a wa
 - Mouse, touch, and keyboard controls
 - Animated character artwork and spell/strike/hit/defeat effects, with a Canvas battle option
 - Inward-facing battle formations, wider sprite spacing and a quick spin toward the target before attacks
+- Staggered positions, an open attack lane and perspective arena scenery; depth-adjusted character scale keeps rear enemies readable
+- Town, exploration and battle music with separate saved music/effect volumes and master mute
 - Small supply, currency, seal and equipment illustrations in menus
 
 The existing RPG contributes artwork and effects only. Emberwake's combat engine, turn order, damage, focus, progression and saves are unchanged in this visual update. Characters use front-facing relief animation, not full sculpted 3D models. Some enemy artwork mappings remain provisional.
@@ -22,6 +24,8 @@ Choose **Light the lantern & begin**. Use arrow keys, WASD, or direction buttons
 Progress saves in your browser. Camp offers JSON backup downloads and imports. Saves do not automatically move between devices, browsers, localhost, and this public site. To move an existing adventure, export it from Camp on the old site and import it here.
 
 Use **Battle view: animated / canvas** in the header to choose the battle presentation. Animated battles require WebGL2; unavailable graphics or character loads fall back to Canvas. Reduced-motion preferences shorten action animations.
+
+Use **Sound on/off** for a quick mute or **Audio** for separate music and sound-effect sliders. The first visit starts muted. Playback begins after interaction; tracks load as needed and fade between contexts. Settings remain on this browser. Humanoid art uses strong three-quarter relief poses; separately drawn side/back character views are still a future artwork task.
 
 ## Development
 
@@ -43,9 +47,9 @@ GitHub Actions runs the regression suite before deploying `dist/` to GitHub Page
 
 ## Prototype status
 
-This is a playable development prototype. 53 JavaScript tests cover rules, progression gates, story choices, save migration, recovery and presentation utilities; five Python tests cover asset transaction recovery. Desktop and phone browser checks covered battle entry, spell/strike/defeat, enemy turns, view switching, reload and menu icons. Full party/boss/failure-mode coverage remains ongoing. Simulated completion is not a measured human playthrough. No measured playtime is claimed.
+This is a playable development prototype. 59 JavaScript tests cover rules, progression gates, story choices, save migration, recovery, projected battle spacing/size and audio lifecycle; five Python tests cover asset transaction recovery. Browser checks covered actual spell/special resolution, held attack poses, full-party/dragon staging, music playback, volume persistence and phone layouts. Full campaign and graphics failure-mode coverage remain ongoing. Simulated completion is not a measured human playthrough. No measured playtime is claimed.
 
-See [issues and workarounds](ISSUES.md) and the [update checklist](UPDATE_CHECKLIST.md). Audio, region scenery, the generated terrain and later combat-design changes are separate pending tasks.
+See [issues and workarounds](ISSUES.md) and the [update checklist](UPDATE_CHECKLIST.md). Further artwork/scenery polish, generated-terrain integration and later combat-design changes remain separate tasks.
 
 Inspired by the compact exploration and turn-based party mechanics of Grognak & the Ruby Ruins. The world, story, characters, rules, and implementation here are an original project, unaffiliated with Bethesda or Fallout.
 
