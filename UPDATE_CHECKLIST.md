@@ -14,6 +14,10 @@ Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier 
 
 ## Completed in this batch
 
+- [x] Facing adjustment: remove the enemy mirror that pointed bat/dragon art away; angle both formations inward.
+- [x] Fit spacing to actual sprite widths, add a wider central aisle and refit the camera for larger formations.
+- [x] Quick spin before strikes/spells, ending toward the target; reduced motion skips the spin. Flee does not play an attack.
+- [x] Facing/spacing checks: 53 JavaScript tests pass; desktop and 390px two-ally/two-enemy layout checked without page overflow or console errors.
 - [x] R01: resolve local three.js imports without a bundler or import map.
 - [x] R03: fix ambient particle emission; test 30/60/120Hz behavior.
 - [x] A01: stage/validate asset builds, preserve output on failure, configurable source paths, retain backup if rollback itself fails.

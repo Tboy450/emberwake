@@ -1,4 +1,5 @@
 // Presentation only. Never imports the combat engine or changes an adventure save.
+import {battleFormation,targetYaw,attackTurn} from './battle-blocking.js';
 const HERO_ART={vera:'mage',rook:'warrior',fenn:'rogue'};
 const ENEMY_ART={moth:'crystal_bat',tree:'plague_knight',bell:'plague_knight',ghost:'ghost_face',knight:'town_guard',mage:'plague_knight',sun:'dragon'};
 const REDUCED=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -35,7 +36,8 @@ export class BattleAdapter {
   if(!webglAvailable())throw Error('WebGL2 unavailable');
   if(!this.stage){this.stage=new Stage(this.canvas);this.stage.renderer.debug.onShaderError=()=>queueMicrotask(()=>this.fail(Error('Battle shader unavailable')));}
   const fighters=[...state.party,...state.battle.enemies];
-  const loaded=await Promise.allSettled(fighters.map((f,i)=>Actor.create(i<state.party.length?HERO_ART[f.id]:ENEMY_ART[f.kind]||'plague_knight',{h:i<state.party.length?2.1:f.kind==='sun'?3.3:1.9,flip:i>=state.party.length})));
+  // The supplied bat/dragon art already faces left. Mirroring every enemy turned them away.
+  const loaded=await Promise.allSettled(fighters.map((f,i)=>Actor.create(i<state.party.length?HERO_ART[f.id]:ENEMY_ART[f.kind]||'plague_knight',{h:i<state.party.length?2.1:f.kind==='sun'?3.3:1.9})));
   if(generation!==this.generation||!this.enabled){for(const r of loaded)if(r.status==='fulfilled')r.value.dispose();return;}
   if(loaded.some(r=>r.status==='rejected')){for(const r of loaded)if(r.status==='fulfilled')r.value.dispose();throw Error('Character artwork unavailable');}
   this.releaseScene();
@@ -44,10 +46,13 @@ export class BattleAdapter {
   const rim=new T.PointLight(0x88bbff,16,15);rim.position.set(2,3,-2);scene.add(rim);
   const floor=new T.Mesh(new T.PlaneGeometry(35,25),new T.MeshStandardMaterial({color:0x34474c,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.z=-3;scene.add(floor);
   this.actors=new Map();
-  loaded.forEach((r,i)=>{const actor=r.value,f=fighters[i],hero=i<state.party.length,index=hero?i:i-state.party.length;actor.place(hero?-2.9+index*.9:1+index*1.1,0,hero?.6:-.35);scene.add(actor.group);this.actors.set(f.id,actor);});
+  const actors=loaded.map(r=>r.value),formation=battleFormation(actors.slice(0,state.party.length),actors.slice(state.party.length));
+  formation.slots.forEach(({actor,x,z,yaw})=>actor.place(x,0,z,yaw));
+  actors.forEach((actor,i)=>{scene.add(actor.group);this.actors.set(fighters[i].id,actor);});
   this.fx=new Fx(this.stage,scene);
-  this.stage.camera.position.set(0,2.8,9.8);this.stage.camera.lookAt(0,1.1,0);
-  this.stage.view={scene,update:(dt,t)=>{for(const actor of this.actors.values())actor.update(REDUCED()?0:dt,REDUCED()?0:t);this.fx.update(dt);}};
+  const fitCamera=()=>{const camera=this.stage.camera,halfFov=Math.tan(camera.fov*Math.PI/360),distance=Math.max(9.8,(formation.width+1.2)/(2*halfFov*camera.aspect));camera.position.set(0,2.8,distance);camera.lookAt(0,1.35,0);};
+  fitCamera();
+  this.stage.view={scene,update:(dt,t)=>{fitCamera();for(const actor of this.actors.values())actor.update(REDUCED()?0:dt,REDUCED()?0:t);this.fx.update(dt);}};
   this.loading=false;this.canvas.hidden=false;this.fallback.hidden=true;this.stage.resize();this.visibility();this.sync(state);this.onStatus('Animated battle');
  }
  sync(state){if(!this.scene)return;for(const f of [...state.party,...state.battle.enemies]){const actor=this.actors.get(f.id);if(!actor)continue;actor.alive=f.hp>0;actor.group.visible=f.hp>0;}this.visibility();}
@@ -55,13 +60,19 @@ export class BattleAdapter {
   if(!this.enabled||this.failed||this.loading||!this.scene||this.canvas.hidden)return;
   const a=this.actors.get(actorId),t=this.actors.get(targetId),generation=this.generation;if(!a)return;
   this.visibility();const short=REDUCED();
+  if(action==='flee')return;
   if(action==='guard'||action==='restore'||action==='potion'||(action==='skill'&&actorId==='fenn')){
    if(!short)await this.fx.ring(a.chest(),action==='guard'?0x87cfe5:0xa8e7a7,2.2,380);
    if(generation!==this.generation)return;
    await a.flash(this.stage,0x93e8c4,short?100:240);return;
   }
   if(!t)return;
-  if(short){await t.flash(this.stage,0xffddb4,100);return;}
+  const facing=targetYaw(a.group.position,t.group.position);
+  if(short){a.group.rotation.y=facing;await t.flash(this.stage,0xffddb4,100);return;}
+  const startYaw=a.group.rotation.y;
+  await this.stage.tween(360,k=>{a.group.rotation.y=attackTurn(startYaw,facing,k);a.pose.lift=Math.sin(k*Math.PI)*.12;});
+  if(generation!==this.generation)return;
+  a.group.rotation.y=facing;a.pose.lift=0;
   if(action==='skill'&&actorId==='vera'){
    const i=a.boneIndex('hand');await this.stage.tween(230,k=>{a.pose.bones[i]=-.4*k;a.pose.lean=-.04*k;});
    if(generation!==this.generation)return;
@@ -71,7 +82,7 @@ export class BattleAdapter {
    if(generation!==this.generation)return;
    this.fx.burst(to,24,{color:0xffb15b});await t.flash(this.stage,0xffa455,200);
   }else{
-   const base=a.group.position.clone(),end=base.clone();end.x+=(t.group.position.x-base.x)*.3;end.z+=.25;
+   const base=a.group.position.clone(),end=base.clone();end.x+=Math.sign(t.group.position.x-base.x)*Math.min(1.1,Math.abs(t.group.position.x-base.x)*.25);end.z+=.25;
    await this.stage.tween(190,k=>{a.group.position.lerpVectors(base,end,k);a.pose.lean=-.06*k;a.pose.bones[0]=-.45*k;});
    if(generation!==this.generation)return;
    this.fx.burst(t.chest(),14,{color:0xffdab4,size:.12});this.stage.shake=.035;

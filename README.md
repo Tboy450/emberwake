@@ -10,6 +10,7 @@ A browser RPG about a lantern mage crossing a kingdom without dawn. Explore a wa
 - Optional islands, roaming guardians, equipment, and two ending paths
 - Mouse, touch, and keyboard controls
 - Animated character artwork and spell/strike/hit/defeat effects, with a Canvas battle option
+- Inward-facing battle formations, wider sprite spacing and a quick spin toward the target before attacks
 - Small supply, currency, seal and equipment illustrations in menus
 
 The existing RPG contributes artwork and effects only. Emberwake's combat engine, turn order, damage, focus, progression and saves are unchanged in this visual update. Characters use front-facing relief animation, not full sculpted 3D models. Some enemy artwork mappings remain provisional.
@@ -42,7 +43,7 @@ GitHub Actions runs the regression suite before deploying `dist/` to GitHub Page
 
 ## Prototype status
 
-This is a playable development prototype. 51 JavaScript tests cover rules, progression gates, story choices, save migration, recovery and presentation utilities; five Python tests cover asset transaction recovery. Desktop and phone browser checks covered battle entry, spell/strike/defeat, enemy turns, view switching, reload and menu icons. Full party/boss/failure-mode coverage remains ongoing. Simulated completion is not a measured human playthrough. No measured playtime is claimed.
+This is a playable development prototype. 53 JavaScript tests cover rules, progression gates, story choices, save migration, recovery and presentation utilities; five Python tests cover asset transaction recovery. Desktop and phone browser checks covered battle entry, spell/strike/defeat, enemy turns, view switching, reload and menu icons. Full party/boss/failure-mode coverage remains ongoing. Simulated completion is not a measured human playthrough. No measured playtime is claimed.
 
 See [issues and workarounds](ISSUES.md) and the [update checklist](UPDATE_CHECKLIST.md). Audio, region scenery, the generated terrain and later combat-design changes are separate pending tasks.
 

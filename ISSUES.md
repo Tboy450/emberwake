@@ -4,6 +4,7 @@ Updated November 5, 2026. This distinguishes working gameplay, experimental file
 
 | ID | Issue and impact | Fix or workaround | Status |
 | --- | --- | --- | --- |
+| R07 | Mirroring all enemies pointed left-facing source art away from the party; fixed slots overlapped winged sprites. | Remove unconditional mirroring, angle both formations inward, place by actual width, fit camera and spin to target before attacks. Desktop/phone checks and two formation/turn regressions pass. | Fixed |
 | A01 | Asset rebuild deletes generated folders before validating sources; failure can destroy a working bundle. | Staging, validation and rollback implemented; five transaction tests pass. Full archive rebuild remains unverified. | Fixed; regeneration pending |
 | R01 | Bare `three` imports have no browser resolution. New modules cannot load directly. | Adapter modules resolve against the bundled version using explicit relative imports. Browser and module checks pass. | Fixed for active modules |
 | R02 | GLTFLoader imports a missing BufferGeometryUtils dependency. | Do not load GLB scenery in this batch; complete and verify the loader dependency tree before use. | Deferred |
