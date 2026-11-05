@@ -46,6 +46,6 @@ Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier 
 - [ ] Keep save compatibility and rewrite/test affected balance and progression when those rules actually change.
 - [ ] Ghost Face encounter and extra companion/NPC assets.
 - [ ] Both endings through UI, full human playthrough, accessibility and measured duration.
-- [ ] Publish tested changes through the existing public GitHub Pages repo; keep private paths and review files local.
+- [x] Publish tested visuals and menu assets through the existing GitHub Pages repo; commit b9613a3 deployed successfully. Private paths, unused loaders and review files stayed local.
 
 Bot runs establish scripted reachability, not human duration or final balance. Relief deformation is not full volumetric character modeling. Public and development builds must remain distinguishable.
