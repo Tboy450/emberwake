@@ -1,0 +1,51 @@
+# Emberwake TODO / update checklist
+
+Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier checklists are retained in review/.
+
+## Constraints and direction
+
+- [x] Reuse the existing RPG's art, attack visuals and audio where useful; do not import its combat rules.
+- [x] Preserve Emberwake's current engine during the graphics pass.
+- [x] Keep the protagonist's asset and avoid a color-based nickname.
+- [x] Create a clear [issue register](ISSUES.md) separating fixes, workarounds and later tasks.
+- [ ] Update the protagonist's visible name/pronouns to the mage/he while retaining the stable save ID.
+- [ ] Improve/expand Emberwake's own story a little; it does not need to copy Grognak's story.
+- [ ] Never use the built-in image generator (standing requirement).
+
+## Completed in this batch
+
+- [x] R01: resolve local three.js imports without a bundler or import map.
+- [x] R03: fix ambient particle emission; test 30/60/120Hz behavior.
+- [x] A01: stage/validate asset builds, preserve output on failure, configurable source paths, retain backup if rollback itself fails.
+- [x] R04: renderer frame-loop/observer cleanup and effect disposal; reject stale asynchronous actor loads.
+- [x] R05 workaround: retain front-facing relief presentation and disable inaccurate static cast shadows.
+- [x] Connect battle adapter to the real game without changing engine rules.
+- [x] Prevent duplicate input during an animation; resolve enemy visual targets from the engine's actual outcome.
+- [x] Mage casting, ordinary strikes, hit flashes, guard/heal effects and defeat dissolve.
+- [x] Explicit view switch plus automatic load/shader/WebGL/context-loss fallback.
+- [x] Small supply/crown/seal drawings and imported equipment icons in menus.
+- [x] 51 JavaScript tests and 5 Python build-transaction tests pass.
+- [x] Desktop browser: icons, battle entry, spell, attack/defeat, enemy turns, view switch and reload.
+- [x] Phone-width animated battle check at390px; no horizontal page overflow observed.
+
+## Current limitations / next work
+
+- [ ] Broader battle checks: three allies, all enemy types, AoE, revival, flee, win/defeat, pause, reduced motion and context loss.
+- [ ] Ensure all displayed enemy art fits its name and story; current mappings are provisional.
+- [ ] Complete GLTFLoader dependencies before using imported GLB scenery; unused loader is not part of the adapter.
+- [ ] Region-specific staged scenery and more individual attacks; current arena is deliberately simple.
+- [ ] Music and effects playback with independent saved volume/mute controls, lazy loads and crossfade.
+- [ ] Menu icons for additional real loot; do not imply the 51 imported icons are all implemented items.
+- [ ] Carry original source/license notices into public asset credits before adding further packs.
+- [ ] Verify full asset regeneration from the original archive; failure/rollback paths are tested.
+
+## Later systems pass, separate from graphics
+
+- [ ] Integrate generated organic terrain, collision, nine moved landmarks, new location and patrols together with save migration.
+- [ ] Opening companion choices and roles, item-led growth, Meditate, survivor-only healing and paid revival, and multi-room dungeons toward the Grognak-like design.
+- [ ] Keep save compatibility and rewrite/test affected balance and progression when those rules actually change.
+- [ ] Ghost Face encounter and extra companion/NPC assets.
+- [ ] Both endings through UI, full human playthrough, accessibility and measured duration.
+- [ ] Publish tested changes through the existing public GitHub Pages repo; keep private paths and review files local.
+
+Bot runs establish scripted reachability, not human duration or final balance. Relief deformation is not full volumetric character modeling. Public and development builds must remain distinguishable.

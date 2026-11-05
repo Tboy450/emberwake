@@ -24,7 +24,12 @@ jobs:
         with:
           node-version: '24'
       - name: Run game and save regression tests
-        run: node --test tests/engine.test.mjs tests/world.test.mjs tests/story.test.mjs tests/storage.test.mjs
+        run: node --test tests/*.test.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run asset transaction recovery tests
+        run: python tests/test_asset_transaction.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

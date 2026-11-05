@@ -6,3 +6,5 @@ node_modules/
 review/
 *.log
 .DS_Store
+__pycache__/
+.test-tmp/
