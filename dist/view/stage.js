@@ -20,8 +20,9 @@ export function webglAvailable() {
 }
 
 export class Stage {
-  constructor(canvas) {
+  constructor(canvas,{onError=()=>{}}={}) {
     this.canvas = canvas;
+    this.onError=onError;
     this.renderer = new THREE.WebGLRenderer({canvas, antialias: true, powerPreference: 'high-performance'});
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -45,7 +46,7 @@ export class Stage {
       this.frameRequest = requestAnimationFrame(loop);
       const dt = Math.min(.05, (now - this.last) / 1000 || 0);
       this.last = now;
-      if (!this.paused) this.frame(dt);
+      if (!this.paused) this.renderSafely(dt);
     };
     this.frameRequest = requestAnimationFrame(loop);
   }
@@ -78,8 +79,12 @@ export class Stage {
     let ox = 0, oy = 0;
     if (s > .001 && !REDUCED_MOTION) { ox = (Math.random() - .5) * s; oy = (Math.random() - .5) * s; cam.position.x += ox; cam.position.y += oy; }
     this.shake *= Math.exp(-dt * 9);
-    this.renderer.render(this.view.scene, cam);
-    if (ox || oy) { cam.position.x -= ox; cam.position.y -= oy; }
+    try{this.renderer.render(this.view.scene, cam);}
+    finally{if (ox || oy) { cam.position.x -= ox; cam.position.y -= oy; }}
+  }
+
+  renderSafely(dt){
+    try{this.frame(dt);}catch(error){this.paused=true;this.clearTweens();this.onError(error);}
   }
 
   tween(ms, fn, easing = ease.out, real = false) {

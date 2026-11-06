@@ -47,7 +47,7 @@ GitHub Actions runs the regression suite before deploying `dist/` to GitHub Page
 
 ## Prototype status
 
-This is a playable development prototype. 59 JavaScript tests cover rules, progression gates, story choices, save migration, recovery, projected battle spacing/size and audio lifecycle; five Python tests cover asset transaction recovery. Browser checks covered actual spell/special resolution, held attack poses, full-party/dragon staging, music playback, volume persistence and phone layouts. Full campaign and graphics failure-mode coverage remain ongoing. Simulated completion is not a measured human playthrough. No measured playtime is claimed.
+This is a playable development prototype. 63 JavaScript tests cover rules, progression gates, story choices, save migration, recovery, projected battle spacing/size and audio lifecycle; five Python tests cover asset transaction recovery. Browser checks covered actual spell/special resolution, held attack poses, full-party/dragon staging, music playback, volume persistence and phone layouts. Full campaign and graphics failure-mode coverage remain ongoing. Simulated completion is not a measured human playthrough. No measured playtime is claimed.
 
 See [issues and workarounds](ISSUES.md) and the [update checklist](UPDATE_CHECKLIST.md). Further artwork/scenery polish, generated-terrain integration and later combat-design changes remain separate tasks.
 

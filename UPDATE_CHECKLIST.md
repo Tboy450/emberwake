@@ -1,6 +1,6 @@
 # Emberwake TODO / update checklist
 
-Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier checklists are retained in review/.
+Updated November 6, 2026. Earlier checklists are retained in review/.
 
 ## Constraints and direction
 
@@ -14,6 +14,8 @@ Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier 
 
 ## Completed in this batch
 
+- [x] November 6 review: no newer Claude pass found; current build matched the published game. Fixed revived sprites retaining dissolve, misdirected healing effects, runtime-render failure recovery and cancellation of late actor loads.
+- [x] 63 JavaScript + five Python checks pass. Browser fixture using the real engine confirms draught revival, Greenwake healing/poison clearing and injected-render-error fallback.
 - [x] Latest staging correction: party in foreground, all enemies farther upfield, same apparent enemy height; broaden the receding road to exaggerate distance.
 - [x] Heroes, active units and selected targets face the camera while resting. Attacks turn toward the target in place, then restore the resting pose; avoid marching through allies.
 - [x] Reduced the bat's hover height so its wings stay inside the far-field framing. Actual Sunshard/enemy turns return to camera-facing heroes correctly; all 59 JavaScript checks pass.

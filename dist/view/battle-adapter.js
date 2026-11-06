@@ -36,7 +36,7 @@ export class BattleAdapter {
   const [{Stage,webglAvailable},{Actor},{Fx,loadBattleEffects},T]=await this.modules();
   if(generation!==this.generation||!this.enabled)return;
   if(!webglAvailable())throw Error('WebGL2 unavailable');
-  if(!this.stage){this.stage=new Stage(this.canvas);this.stage.renderer.debug.onShaderError=()=>queueMicrotask(()=>this.fail(Error('Battle shader unavailable')));}
+  if(!this.stage){this.stage=new Stage(this.canvas,{onError:error=>this.fail(error)});this.stage.renderer.debug.onShaderError=()=>queueMicrotask(()=>this.fail(Error('Battle shader unavailable')));}
   const fighters=[...state.party,...state.battle.enemies];
   // The supplied bat/dragon art already faces left. Mirroring every enemy turned them away.
   const loaded=await Promise.allSettled(fighters.map((f,i)=>Actor.create(i<state.party.length?HERO_ART[f.id]:ENEMY_ART[f.kind]||'plague_knight',{h:i<state.party.length?2.3:f.kind==='sun'?3.6:2.2})));
@@ -66,7 +66,7 @@ export class BattleAdapter {
   if(actor.isHero||id===this.currentState?.battle?.actor||id===this.selectedId)actor.faceCamera(this.stage.camera);
   else actor.face(targetYaw(actor.group.position,{x:0,z:5}));
  }
- sync(state){if(!this.scene)return;for(const f of [...state.party,...state.battle.enemies]){const actor=this.actors.get(f.id);if(!actor)continue;actor.alive=f.hp>0;actor.group.visible=f.hp>0;if(this.animating!==f.id)this.restFacing(actor,f.id);}this.visibility();}
+ sync(state){if(!this.scene)return;for(const f of [...state.party,...state.battle.enemies]){const actor=this.actors.get(f.id);if(!actor)continue;actor.setAlive(f.hp>0);if(this.animating!==f.id)this.restFacing(actor,f.id);}this.visibility();}
  async animate(options){
   this.animating=options.actorId;
   try{await this.playAction(options);}finally{this.animating=null;const actor=this.actors.get(options.actorId);if(actor)this.restFacing(actor,options.actorId);}
@@ -77,9 +77,10 @@ export class BattleAdapter {
   this.visibility();const short=REDUCED();
   if(action==='flee')return;
   if(action==='guard'||action==='restore'||action==='potion'||(action==='skill'&&actorId==='fenn')){
-   if(!short)await this.fx.ring(a.chest(),action==='guard'?0x87cfe5:0xa8e7a7,2.2,380);
+   const recipients=action==='skill'?this.currentState.party.filter(h=>h.hp>0).map(h=>this.actors.get(h.id)).filter(Boolean):[action==='potion'?(t||a):a];
+   if(!short)await Promise.all(recipients.map(actor=>this.fx.ring(actor.chest(),action==='guard'?0x87cfe5:0xa8e7a7,2.2,380)));
    if(generation!==this.generation)return;
-   await a.flash(this.stage,0x93e8c4,short?100:240);return;
+   await Promise.all(recipients.filter(actor=>actor.alive).map(actor=>actor.flash(this.stage,0x93e8c4,short?100:240)));return;
   }
   if(!t)return;
   const base=a.group.position.clone(),startYaw=a.group.rotation.y,baseScale=a.group.scale.x,attackAt=attackPosition({x:base.x,z:base.z,scale:baseScale});
@@ -112,13 +113,17 @@ export class BattleAdapter {
  }
  async settle(state){
   if(!this.enabled||this.loading||this.failed||!this.scene)return;
+  const generation=this.generation;
+  const revived=[...state.party,...state.battle.enemies].filter(f=>f.hp>0&&this.actors.get(f.id)?.alive===false);
+  await Promise.all(revived.map(async f=>{const actor=this.actors.get(f.id);actor.setAlive(true);await actor.flash(this.stage,0x93e8c4,REDUCED()?100:240);}));
+  if(generation!==this.generation)return;
   const fallen=[...state.party,...state.battle.enemies].filter(f=>f.hp<=0&&this.actors.get(f.id)?.alive);
   await Promise.all(fallen.map(async f=>{const a=this.actors.get(f.id);a.alive=false;
    if(!REDUCED())await this.stage.tween(280,k=>{a.group.rotation.z=-.3*k;a.u.uDissolve.value=k;});
    a.group.visible=false;
   }));
  }
- fail(error){if(this.failed)return;this.failed=true;this.loading=false;this.hide();this.onStatus('Canvas battle · animated view unavailable');console.warn('Animated battle fallback:',error.message);if(this.stage){this.stage.dispose();this.stage=null;}this.releaseScene();}
+ fail(error){if(this.failed)return;this.generation++;this.failed=true;this.loading=false;this.hide();this.onStatus('Canvas battle · animated view unavailable');console.warn('Animated battle fallback:',error.message);if(this.stage){this.stage.dispose();this.stage=null;}this.releaseScene();}
  releaseScene(){
   if(this.stage){this.stage.clearTweens();this.stage.view=null;}
   for(const actor of this.actors.values())actor.dispose();this.actors.clear();

@@ -210,6 +210,15 @@ export class Actor {
 
   boneIndex(name) { return this.rig.bones.findIndex(b => b.name === name); }
 
+  setAlive(alive){
+    if(alive&&!this.alive){
+      this.u.uDissolve.value=0;this.group.rotation.z=0;
+      this.pose.bones.fill(0);Object.assign(this.pose,{lean:0,lift:0,squash:0});
+      this.material.emissiveIntensity=0;
+    }
+    this.alive=alive;this.group.visible=alive;
+  }
+
   faceCamera(camera){
     this.group.rotation.y=Math.atan2(camera.position.x-this.group.position.x,camera.position.z-this.group.position.z);
     this.mesh.scale.x=this.flip;this.heading=this.group.rotation.y;
