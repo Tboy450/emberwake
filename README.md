@@ -10,8 +10,8 @@ A browser RPG about a lantern mage crossing a kingdom without dawn. Explore a wa
 - Optional islands, roaming guardians, equipment, and two ending paths
 - Mouse, touch, and keyboard controls
 - Animated character artwork and spell/strike/hit/defeat effects, with a Canvas battle option
-- Inward-facing battle formations, wider sprite spacing and a quick spin toward the target before attacks
-- Staggered positions, an open attack lane and perspective arena scenery; depth-adjusted character scale keeps rear enemies readable
+- Camera-facing idle heroes and selected/active units; a quick turn toward the target for attacks, then return to the camera
+- Foreground party and far-field enemy positions with exaggerated road perspective; depth-adjusted character scale keeps rear enemies readable
 - Town, exploration and battle music with separate saved music/effect volumes and master mute
 - Small supply, currency, seal and equipment illustrations in menus
 

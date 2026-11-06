@@ -22,7 +22,7 @@ export function buildArena(scene,node){
  function mesh(geometry,mat,x,y,z){const m=new T.Mesh(geometry,mat);m.position.set(x,y,z);root.add(m);return m;}
  const floor=mesh(new T.PlaneGeometry(90,32),ground,0,-.07,-6);floor.rotation.x=-Math.PI/2;
  for(let i=0;i<15;i++){
-  const z=6-i*1.75,wide=3.2-i*.06;
+  const z=6-i*1.75,wide=6-i*.28;
   for(let j=0;j<3;j++){
    const slab=mesh(new T.CylinderGeometry(.5,.58,.1,6),i%3?stone:dark,(j-1)*wide*.31+Math.sin(i*3+j)*.13,-.01,z);
    slab.scale.set(wide*.32,1,.62-i*.022);slab.rotation.y=i+j*.4;

@@ -34,7 +34,7 @@ export const RIGS = {
   crystal_bat: {h: 1.5, depth: .22, bones: [
     {name: 'wingL', c: [.2, .64], r: [.36, .5], p: [.42, .56]},
     {name: 'wingR', c: [.82, .7], r: [.34, .5], p: [.56, .56]},
-    {name: 'head', c: [.46, .42], r: [.16, .16], p: [.47, .5]}], wave: 0, hover: .16, flap: .3, fly: 1.1, attack: 'swoop'},
+    {name: 'head', c: [.46, .42], r: [.16, .16], p: [.47, .5]}], wave: 0, hover: .16, flap: .3, fly: .45, attack: 'swoop'},
   drake_hatchling: {h: 1.9, depth: .36, bones: [
     {name: 'wingL', c: [.16, .66], r: [.26, .32], p: [.34, .6]},
     {name: 'wingR', c: [.84, .66], r: [.26, .32], p: [.66, .6]},
@@ -209,6 +209,11 @@ export class Actor {
   }
 
   boneIndex(name) { return this.rig.bones.findIndex(b => b.name === name); }
+
+  faceCamera(camera){
+    this.group.rotation.y=Math.atan2(camera.position.x-this.group.position.x,camera.position.z-this.group.position.z);
+    this.mesh.scale.x=this.flip;this.heading=this.group.rotation.y;
+  }
 
   face(yaw){
     this.heading=yaw;

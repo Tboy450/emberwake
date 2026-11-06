@@ -14,6 +14,9 @@ Updated November 5, 2026. Replaces the paused/experimental-only status. Earlier 
 
 ## Completed in this batch
 
+- [x] Latest staging correction: party in foreground, all enemies farther upfield, same apparent enemy height; broaden the receding road to exaggerate distance.
+- [x] Heroes, active units and selected targets face the camera while resting. Attacks turn toward the target in place, then restore the resting pose; avoid marching through allies.
+- [x] Reduced the bat's hover height so its wings stay inside the far-field framing. Actual Sunshard/enemy turns return to camera-facing heroes correctly; all 59 JavaScript checks pass.
 - [x] Replace the single-row field with staggered formations, a clear attack lane and stronger target-facing release poses.
 - [x] Perspective arena with a receding stone road, ruins, trees, foreground lanterns, contact shadows and regional colors.
 - [x] Compensate character scale for camera depth; test front/rear apparent height and projected silhouette clearance.

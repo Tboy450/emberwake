@@ -17,8 +17,8 @@ export function battleFormation(party,enemies){
  const slots=[];
  for(const [row,side] of [[party,-1],[enemies,1]]){
   row.forEach((actor,index)=>{
-   const baseline=row.length===1?(side<0?-.8:.5):[-1.1,.65,2.4][index];
-   const projectedX=side*(row.length===1?3.5:index===1?2.1:5);
+   const baseline=side<0?[-1.65,-1.1,-1.65][index]:row.length===1?1.5:[1.65,1.8,1.4][index];
+   const projectedX=side<0?(row.length===1?-2.5:[-4,-.6,2.9][index]):row.length===1?1:[-3.3,0,3.5][index];
    const placement=arenaPlacement(projectedX,baseline,actor.h);
    slots.push({actor,...placement,baseline,projectedX,yaw:side<0?Math.PI/2:-Math.PI/2});
   });
@@ -32,4 +32,5 @@ export function attackTurn(start,end,k){
  const shortest=Math.atan2(Math.sin(end-start),Math.cos(end-start));
  return start+shortest*k+Math.sign(shortest||end||1)*Math.PI*2*k;
 }
-export function attackPosition(from,h=2.3){return {...arenaPlacement(from.x<0?-.2:.2,-1.8,h),y:0};}
+// Attack from the reserved slot: moving forward through the company caused overlap.
+export function attackPosition(from){return {x:from.x,y:0,z:from.z,scale:from.scale??1};}

@@ -23,7 +23,8 @@ export class BattleAdapter {
  setEnabled(enabled){this.enabled=enabled;this.failed=false;if(!enabled){this.generation++;this.battle=null;this.releaseScene();this.hide();}}
  hide(){this.canvas.hidden=true;this.fallback.hidden=false;if(this.stage)this.stage.paused=true;}
  pause(paused){if(this.stage)this.stage.paused=paused||document.hidden||!this.enabled||!this.battle;}
- show(state){
+ show(state,{selectedId=null}={}){
+  this.currentState=state;this.selectedId=selectedId;
   if(!state.battle||!this.enabled){if(!state.battle){this.generation++;this.battle=null;this.releaseScene();}this.hide();return;}
   if(this.failed)return;
   if(this.battle===state.battle){this.sync(state);return;}
@@ -50,7 +51,7 @@ export class BattleAdapter {
   this.actors=new Map();
   const actors=loaded.map(r=>r.value),formation=battleFormation(actors.slice(0,state.party.length),actors.slice(state.party.length));
   formation.slots.forEach(({actor,x,z,yaw,scale})=>{actor.place(x,0,z,yaw);actor.face(yaw);actor.group.scale.setScalar(scale);actor.homeScale=scale;});
-  actors.forEach((actor,i)=>{scene.add(actor.group);actor.shadow=actorShadow(scene,actor);this.actors.set(fighters[i].id,actor);});
+  actors.forEach((actor,i)=>{actor.isHero=i<state.party.length;scene.add(actor.group);actor.shadow=actorShadow(scene,actor);this.actors.set(fighters[i].id,actor);});
   this.fx=new Fx(this.stage,scene);
   // The scenery uses real perspective; depth-scaled actors retain their readability.
   this.stage.camera=new T.PerspectiveCamera(2*Math.atan(ARENA_HEIGHT/(2*ARENA_DISTANCE))*180/Math.PI,16/10,.1,150);
@@ -60,8 +61,17 @@ export class BattleAdapter {
   this.stage.view={scene,resize:fitCamera,update:(dt,t)=>{for(const actor of this.actors.values()){actor.update(REDUCED()?0:dt,REDUCED()?0:t);actor.shadow.position.set(actor.group.position.x,.025,actor.group.position.z);actor.shadow.scale.set(Math.min(actor.w*.48,.85)*actor.group.scale.x,.32*actor.group.scale.x,1);actor.shadow.visible=actor.group.visible;}this.fx.update(REDUCED()?0:dt);}};
   this.loading=false;this.canvas.hidden=false;this.fallback.hidden=true;this.stage.resize();this.visibility();this.sync(state);this.onStatus('Animated battle');
  }
- sync(state){if(!this.scene)return;for(const f of [...state.party,...state.battle.enemies]){const actor=this.actors.get(f.id);if(!actor)continue;actor.alive=f.hp>0;actor.group.visible=f.hp>0;}this.visibility();}
- async animate({actorId,targetId,action}){
+ restFacing(actor,id){
+  if(!this.stage)return;
+  if(actor.isHero||id===this.currentState?.battle?.actor||id===this.selectedId)actor.faceCamera(this.stage.camera);
+  else actor.face(targetYaw(actor.group.position,{x:0,z:5}));
+ }
+ sync(state){if(!this.scene)return;for(const f of [...state.party,...state.battle.enemies]){const actor=this.actors.get(f.id);if(!actor)continue;actor.alive=f.hp>0;actor.group.visible=f.hp>0;if(this.animating!==f.id)this.restFacing(actor,f.id);}this.visibility();}
+ async animate(options){
+  this.animating=options.actorId;
+  try{await this.playAction(options);}finally{this.animating=null;const actor=this.actors.get(options.actorId);if(actor)this.restFacing(actor,options.actorId);}
+ }
+ async playAction({actorId,targetId,action}){
   if(!this.enabled||this.failed||this.loading||!this.scene||this.canvas.hidden)return;
   const a=this.actors.get(actorId),t=this.actors.get(targetId),generation=this.generation;if(!a)return;
   this.visibility();const short=REDUCED();
@@ -72,7 +82,7 @@ export class BattleAdapter {
    await a.flash(this.stage,0x93e8c4,short?100:240);return;
   }
   if(!t)return;
-  const base=a.group.position.clone(),startYaw=a.group.rotation.y,attackAt=attackPosition(base,a.h),baseScale=a.group.scale.x;
+  const base=a.group.position.clone(),startYaw=a.group.rotation.y,baseScale=a.group.scale.x,attackAt=attackPosition({x:base.x,z:base.z,scale:baseScale});
   const end=base.clone().set(attackAt.x,attackAt.y,attackAt.z),facing=targetYaw(end,t.group.position);
   if(short){a.face(targetYaw(base,t.group.position));await t.flash(this.stage,0xffddb4,100);return;}
   a.face(facing);const endYaw=a.group.rotation.y;

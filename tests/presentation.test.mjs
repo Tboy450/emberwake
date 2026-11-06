@@ -8,6 +8,7 @@ function arenaCamera(){const camera=new PerspectiveCamera(2*Math.atan(ARENA_HEIG
 test('depth formation separates silhouettes in the camera projection, including the attack lane',()=>{
  const party=[{w:1.7,h:2.3},{w:1.8,h:2.3},{w:1.8,h:2.3}],enemies=[{w:1.8,h:2.2},{w:2.5,h:2.2},{w:1.8,h:2.2}];
  const {slots}=battleFormation(party,enemies);
+ assert.ok(Math.max(...slots.slice(3).map(s=>s.z))<Math.min(...slots.slice(0,3).map(s=>s.z))-5,'every enemy must be farther upfield than the entire party');
  const camera=arenaCamera(),box=s=>{const points=[[-.5,0],[.5,0],[-.5,1],[.5,1]].map(([x,y])=>new Vector3(s.x+x*s.actor.w*s.scale,y*s.actor.h*s.scale,s.z).project(camera));const xs=points.map(p=>p.x*ARENA_HEIGHT*.8),ys=points.map(p=>p.y*ARENA_HEIGHT/2);return {x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)};};
  const separated=(a,b)=>a.x+a.w+.2<=b.x||b.x+b.w+.2<=a.x||a.y+a.h+.2<=b.y||b.y+b.h+.2<=a.y;
  for(let i=0;i<slots.length;i++)for(let j=i+1;j<slots.length;j++)assert.ok(separated(box(slots[i]),box(slots[j])),'resting silhouettes must have a visible gap');
