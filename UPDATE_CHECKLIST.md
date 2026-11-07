@@ -1,6 +1,6 @@
 # Emberwake TODO / update checklist
 
-Updated November 6, 2026. Earlier checklists are retained in review/.
+Updated November 7, 2026. Earlier checklists are retained in review/.
 
 ## Constraints and direction
 
@@ -14,6 +14,7 @@ Updated November 6, 2026. Earlier checklists are retained in review/.
 
 ## Completed in this batch
 
+- [x] Verify real browser context loss during a cast, automatic restoration, manual Canvas preference and an attack with WebGL initialization blocked. 64 JavaScript and five Python checks pass.
 - [x] November 6 review: no newer Claude pass found; current build matched the published game. Fixed revived sprites retaining dissolve, misdirected healing effects, runtime-render failure recovery and cancellation of late actor loads.
 - [x] 63 JavaScript + five Python checks pass. Browser fixture using the real engine confirms draught revival, Greenwake healing/poison clearing and injected-render-error fallback.
 - [x] Latest staging correction: party in foreground, all enemies farther upfield, same apparent enemy height; broaden the receding road to exaggerate distance.
@@ -46,7 +47,7 @@ Updated November 6, 2026. Earlier checklists are retained in review/.
 
 ## Current limitations / next work
 
-- [ ] Broader battle checks: three allies, all enemy types, AoE, revival, flee, win/defeat, pause, reduced motion and context loss.
+- [ ] Broader battle checks for all enemy types, flee, win/defeat, pause and reduced motion. Three-ally healing, revival and WebGL loss/restoration have dedicated checks.
 - [ ] Ensure all displayed enemy art fits its name and story; current mappings are provisional.
 - [ ] Complete GLTFLoader dependencies before using imported GLB scenery; unused loader is not part of the adapter.
 - [ ] Refine regional scenery and individual attacks further; code-built regional arenas now work. Side/back character artwork is still absent; the renderer uses stronger three-quarter poses over supplied front art.

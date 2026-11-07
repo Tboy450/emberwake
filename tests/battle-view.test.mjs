@@ -40,3 +40,25 @@ test('context failure during actor loading disposes late actors without installi
  const warning=console.warn;console.warn=()=>{};try{adapter.fail(Error('context lost'));}finally{console.warn=warning;}
  finish({dispose(){disposed++;}});await pending;assert.equal(disposed,1);assert.equal(adapter.generation,2);assert.equal(adapter.failed,true);assert.equal(adapter.scene,undefined);
 });
+
+test('context restoration rebuilds the current battle once and respects the Canvas choice',()=>{
+ const state={battle:{}};
+ const calls=[];
+ const adapter=Object.assign(Object.create(BattleAdapter.prototype),{
+  enabled:true,contextUnavailable:true,failed:true,currentState:state,battle:state.battle,selectedId:'enemy1',
+  show(...args){assert.equal(this.battle,null);calls.push(args);},
+  releaseScene(){},hide(){}
+ });
+ adapter.setEnabled(true);
+ assert.equal(adapter.failed,true,'changing the preference cannot clear a pending context loss');
+ adapter.restoreContext();
+ adapter.restoreContext();
+ assert.deepEqual(calls,[[state,{selectedId:'enemy1'}]]);
+ assert.equal(adapter.failed,false);
+
+ adapter.contextUnavailable=true;
+ adapter.setEnabled(false);
+ adapter.restoreContext();
+ assert.equal(calls.length,1);
+ assert.equal(adapter.contextUnavailable,false);
+});

@@ -10,9 +10,16 @@ export class BattleAdapter {
   this.container=container;this.fallback=fallback;this.onStatus=onStatus;
   this.canvas=document.createElement('canvas');this.canvas.id='battle-3d';this.canvas.hidden=true;this.canvas.setAttribute('aria-hidden','true');container.insertBefore(this.canvas,fallback);
   this.enabled=false;this.generation=0;this.actors=new Map();this.battle=null;this.loading=false;this.failed=false;
+  this.contextUnavailable=false;
   this.visibility=()=>{if(this.stage)this.stage.paused=document.hidden||document.querySelector('dialog[open]')!==null||!this.enabled||!this.battle;};
-  this.contextLost=event=>{event.preventDefault();this.fail(Error('Graphics context lost'));};
+  this.contextLost=event=>{
+   event.preventDefault();
+   this.contextUnavailable=true;
+   this.fail(Error('Graphics context lost'));
+  };
+  this.contextRestored=()=>this.restoreContext();
   this.canvas.addEventListener('webglcontextlost',this.contextLost);
+  this.canvas.addEventListener('webglcontextrestored',this.contextRestored);
   document.addEventListener('visibilitychange',this.visibility);
  }
  async modules(){
@@ -20,9 +27,17 @@ export class BattleAdapter {
   this.dependencies=Promise.all([import('./stage.js'),import('./actor.js'),import('./fx.js'),import('../vendor/three/three.module.min.js')]);
   return this.dependencies;
  }
- setEnabled(enabled){this.enabled=enabled;this.failed=false;if(!enabled){this.generation++;this.battle=null;this.releaseScene();this.hide();}}
+ setEnabled(enabled){this.enabled=enabled;this.failed=this.contextUnavailable;if(!enabled){this.generation++;this.battle=null;this.releaseScene();this.hide();}}
  hide(){this.canvas.hidden=true;this.fallback.hidden=false;if(this.stage)this.stage.paused=true;}
  pause(paused){if(this.stage)this.stage.paused=paused||document.hidden||!this.enabled||!this.battle;}
+ restoreContext(){
+  if(!this.contextUnavailable)return;
+  this.contextUnavailable=false;
+  this.failed=false;
+  if(!this.enabled||!this.currentState?.battle)return;
+  this.battle=null;
+  this.show(this.currentState,{selectedId:this.selectedId});
+ }
  show(state,{selectedId=null}={}){
   this.currentState=state;this.selectedId=selectedId;
   if(!state.battle||!this.enabled){if(!state.battle){this.generation++;this.battle=null;this.releaseScene();}this.hide();return;}
@@ -130,5 +145,5 @@ export class BattleAdapter {
   if(this.scene)this.scene.traverse(o=>{if(o.isMesh&&!o.customDepthMaterial){o.geometry?.dispose();if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material?.dispose();}});
   this.fx?.dispose();this.fx=null;this.scene=null;
  }
- dispose(){this.generation++;this.battle=null;document.removeEventListener('visibilitychange',this.visibility);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.releaseScene();this.stage?.dispose();this.stage=null;this.canvas.remove();}
+ dispose(){this.generation++;this.battle=null;document.removeEventListener('visibilitychange',this.visibility);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.canvas.removeEventListener('webglcontextrestored',this.contextRestored);this.releaseScene();this.stage?.dispose();this.stage=null;this.canvas.remove();}
 }
