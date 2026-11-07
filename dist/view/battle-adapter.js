@@ -3,7 +3,6 @@ import {battleFormation,targetYaw,attackTurn,attackPosition,ARENA_ELEVATION,AREN
 import {buildArena,actorShadow} from './arena.js';
 const HERO_ART={vera:'mage',rook:'warrior',fenn:'rogue'};
 const ENEMY_ART={moth:'crystal_bat',tree:'plague_knight',bell:'plague_knight',ghost:'ghost_face',knight:'town_guard',mage:'plague_knight',sun:'dragon'};
-const REDUCED=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export class BattleAdapter {
  constructor({container,fallback,onStatus=()=>{}}){
@@ -73,7 +72,16 @@ export class BattleAdapter {
   const camera=this.stage.camera;
   camera.position.set(0,ARENA_TARGET_Y+Math.sin(ARENA_ELEVATION)*ARENA_DISTANCE,Math.cos(ARENA_ELEVATION)*ARENA_DISTANCE);camera.lookAt(0,ARENA_TARGET_Y,0);
   const fitCamera=(w,h)=>{camera.aspect=w/h;const height=Math.max(ARENA_HEIGHT,formation.width/(w/h));camera.fov=2*Math.atan(height/(2*ARENA_DISTANCE))*180/Math.PI;camera.updateProjectionMatrix();};
-  this.stage.view={scene,resize:fitCamera,update:(dt,t)=>{for(const actor of this.actors.values()){actor.update(REDUCED()?0:dt,REDUCED()?0:t);actor.shadow.position.set(actor.group.position.x,.025,actor.group.position.z);actor.shadow.scale.set(Math.min(actor.w*.48,.85)*actor.group.scale.x,.32*actor.group.scale.x,1);actor.shadow.visible=actor.group.visible;}this.fx.update(REDUCED()?0:dt);}};
+  this.stage.view={scene,resize:fitCamera,update:(dt,t)=>{
+   const reduced=this.stage.reducedMotion;
+   for(const actor of this.actors.values()){
+    actor.update(reduced?0:dt,reduced?0:t);
+    actor.shadow.position.set(actor.group.position.x,.025,actor.group.position.z);
+    actor.shadow.scale.set(Math.min(actor.w*.48,.85)*actor.group.scale.x,.32*actor.group.scale.x,1);
+    actor.shadow.visible=actor.group.visible;
+   }
+   this.fx.update(dt,reduced);
+  }};
   this.loading=false;this.canvas.hidden=false;this.fallback.hidden=true;this.stage.resize();this.visibility();this.sync(state);this.onStatus('Animated battle');
  }
  restFacing(actor,id){
@@ -89,7 +97,7 @@ export class BattleAdapter {
  async playAction({actorId,targetId,action}){
   if(!this.enabled||this.failed||this.loading||!this.scene||this.canvas.hidden)return;
   const a=this.actors.get(actorId),t=this.actors.get(targetId),generation=this.generation;if(!a)return;
-  this.visibility();const short=REDUCED();
+  this.visibility();const short=this.stage.reducedMotion;
   if(action==='flee')return;
   if(action==='guard'||action==='restore'||action==='potion'||(action==='skill'&&actorId==='fenn')){
    const recipients=action==='skill'?this.currentState.party.filter(h=>h.hp>0).map(h=>this.actors.get(h.id)).filter(Boolean):[action==='potion'?(t||a):a];
@@ -98,9 +106,9 @@ export class BattleAdapter {
    await Promise.all(recipients.filter(actor=>actor.alive).map(actor=>actor.flash(this.stage,0x93e8c4,short?100:240)));return;
   }
   if(!t)return;
+  if(short){a.face(targetYaw(a.group.position,t.group.position));await t.flash(this.stage,0xffddb4,100);return;}
   const base=a.group.position.clone(),startYaw=a.group.rotation.y,baseScale=a.group.scale.x,attackAt=attackPosition({x:base.x,z:base.z,scale:baseScale});
   const end=base.clone().set(attackAt.x,attackAt.y,attackAt.z),facing=targetYaw(end,t.group.position);
-  if(short){a.face(targetYaw(base,t.group.position));await t.flash(this.stage,0xffddb4,100);return;}
   a.face(facing);const endYaw=a.group.rotation.y;
   await this.stage.tween(340,k=>{a.group.rotation.y=attackTurn(startYaw,endYaw,k);a.group.position.lerpVectors(base,end,k);a.group.scale.setScalar(baseScale+(attackAt.scale-baseScale)*k);a.pose.lift=Math.sin(k*Math.PI)*.12;});
   if(generation!==this.generation)return;
@@ -130,11 +138,11 @@ export class BattleAdapter {
   if(!this.enabled||this.loading||this.failed||!this.scene)return;
   const generation=this.generation;
   const revived=[...state.party,...state.battle.enemies].filter(f=>f.hp>0&&this.actors.get(f.id)?.alive===false);
-  await Promise.all(revived.map(async f=>{const actor=this.actors.get(f.id);actor.setAlive(true);await actor.flash(this.stage,0x93e8c4,REDUCED()?100:240);}));
+  await Promise.all(revived.map(async f=>{const actor=this.actors.get(f.id);actor.setAlive(true);await actor.flash(this.stage,0x93e8c4,this.stage.reducedMotion?100:240);}));
   if(generation!==this.generation)return;
   const fallen=[...state.party,...state.battle.enemies].filter(f=>f.hp<=0&&this.actors.get(f.id)?.alive);
   await Promise.all(fallen.map(async f=>{const a=this.actors.get(f.id);a.alive=false;
-   if(!REDUCED())await this.stage.tween(280,k=>{a.group.rotation.z=-.3*k;a.u.uDissolve.value=k;});
+   if(!this.stage.reducedMotion)await this.stage.tween(280,k=>{a.group.rotation.z=-.3*k;a.u.uDissolve.value=k;});
    a.group.visible=false;
   }));
  }

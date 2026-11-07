@@ -10,7 +10,6 @@ export const ease = {
   pulse: t => Math.sin(t * Math.PI),
 };
 export const lerp = (a, b, t) => a + (b - a) * t;
-export const REDUCED_MOTION = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export function webglAvailable() {
   try {
@@ -35,6 +34,7 @@ export class Stage {
     this.time = 0;
     this.timeScale = 1;
     this.shake = 0;
+    this.motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
     this.last = 0;
     this.paused = false;
     this.resize();
@@ -63,6 +63,8 @@ export class Stage {
     this.view?.resize?.(w,h);
   }
 
+  get reducedMotion() { return this.motionPreference.matches; }
+
   frame(dt) {
     const sdt = dt * this.timeScale;
     this.time += sdt;
@@ -75,10 +77,10 @@ export class Stage {
     }
     if (!this.view) return;
     this.view.update?.(sdt, this.time);
-    const cam = this.camera, s = this.shake;
+    const cam = this.camera, s = this.reducedMotion ? 0 : this.shake;
     let ox = 0, oy = 0;
-    if (s > .001 && !REDUCED_MOTION) { ox = (Math.random() - .5) * s; oy = (Math.random() - .5) * s; cam.position.x += ox; cam.position.y += oy; }
-    this.shake *= Math.exp(-dt * 9);
+    if (s > .001) { ox = (Math.random() - .5) * s; oy = (Math.random() - .5) * s; cam.position.x += ox; cam.position.y += oy; }
+    this.shake = s * Math.exp(-dt * 9);
     try{this.renderer.render(this.view.scene, cam);}
     finally{if (ox || oy) { cam.position.x -= ox; cam.position.y -= oy; }}
   }

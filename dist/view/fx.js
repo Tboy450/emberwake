@@ -95,8 +95,9 @@ export class Fx {
   // Region weather: embers, snow, fireflies, ash.
   setAmbient(kind) { this.ambient = kind; this.emissionRemainder = 0; }
 
-  update(dt) {
-    if (this.ambient) {
+  update(dt, reducedMotion = false) {
+    this.points.visible = !reducedMotion;
+    if (this.ambient && !reducedMotion) {
       const a = this.ambient, emission = emissionCount(this.emissionRemainder,a.rate,dt);
       this.emissionRemainder = emission.remainder;
       for (let i = 0; i < emission.count; i++) {

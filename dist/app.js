@@ -47,7 +47,17 @@ function audioDialog(){
  for(const [id,key,label] of [['music-volume','music','music-level'],['effects-volume','effects','effects-level']])$(id).oninput=e=>{const value=Number(e.target.value)/100;soundBed.setPreferences({[key]:value});soundBed.unlock();$(label).value=Math.round(value*100)+'%';};
  $('audio-test').onclick=()=>{soundBed.unlock();chime();};
 }
-function render(){soundBed.setScene(state.battle?'battle':E.nodeById(state.location).type==='town'?'town':'travel');audioButton();renderGame();}
+function render(){
+ const panel=$('panel'),overlay=$('battle-overlay'),active=document.activeElement;
+ const restoreFocus=!overlay.hidden&&(panel.contains(active)||overlay.contains(active));
+ soundBed.setScene(state.battle?'battle':E.nodeById(state.location).type==='town'?'town':'travel');audioButton();renderGame();
+ if(!restoreFocus)return;
+ if(!state.battle){$('location-title').focus({preventScroll:true});return;}
+ const {target:focusedTarget,action:focusedAction}=active.dataset;
+ const selected=focusedTarget&&[...overlay.querySelectorAll('[data-target]:not(:disabled)')].find(button=>button.dataset.target===target);
+ const action=focusedAction&&panel.querySelector(`[data-action="${focusedAction}"]:not(:disabled)`);
+ (selected||action||panel.querySelector('button:not(:disabled)')||panel).focus({preventScroll:true});
+}
 const pct=(a,b)=>Math.max(0,Math.min(100,100*a/b));
 function renderParty(){const b=state.battle;renderPartyStrip();$('party').innerHTML=state.party.map(h=>`<article class="hero-card ${b?.actor===h.id?'current':''} ${h.hp<=0?'fallen':''}"><div class="hero-top"><canvas class="portrait" data-portrait="${h.id}" aria-hidden="true"></canvas><div><h3>${esc(h.name)}</h3><small>${esc(h.role)}</small></div></div><div class="stat-row"><span>${h.hp<=0?'FALLEN':'HEALTH'}${h.poison?' · POISON':''}${h.shield?' · SHIELD '+h.shield:''}</span><b>${h.hp} / ${h.maxHp}</b></div><div class="track" role="meter" aria-label="${esc(h.name)} health" aria-valuenow="${h.hp}" aria-valuemin="0" aria-valuemax="${h.maxHp}"><i style="width:${pct(h.hp,h.maxHp)}%"></i></div><div class="stat-row"><span>FOCUS</span><b>${h.focus} / ${h.maxFocus}</b></div><div class="track focus"><i style="width:${pct(h.focus,h.maxFocus)}%"></i></div></article>`).join('')+(state.party.length<3?`<div class="empty-slot">${3-state.party.length} empty place${state.party.length===1?'s':''} by the fire.<br>Find companions along the road.</div>`:'');document.querySelectorAll('[data-portrait]').forEach(c=>portrait(c,c.dataset.portrait));$('level').textContent=String(state.level).padStart(2,'0');$('xp-bar').style.width=pct(state.xp,state.level*100)+'%';$('xp').textContent=`${state.xp} / ${state.level*100} XP to next level`;$('gold').textContent=state.gold;}
 function renderMap(){

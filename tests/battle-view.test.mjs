@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Actor,RIGS} from '../dist/view/actor.js';
 import {BattleAdapter} from '../dist/view/battle-adapter.js';
+import {Fx} from '../dist/view/fx.js';
 import {Stage} from '../dist/view/stage.js';
 import {PlaneGeometry,Texture} from '../dist/vendor/three/three.module.min.js';
 
@@ -16,16 +17,44 @@ test('revival restores a dissolved actor without changing formation scale',()=>{
 function supportFixture(){
  const events=[],actors=new Map();
  for(const id of ['vera','rook','fenn'])actors.set(id,{alive:true,chest:()=>id,flash:async()=>{events.push('flash:'+id);},group:{}});
- const adapter=Object.assign(Object.create(BattleAdapter.prototype),{enabled:true,failed:false,loading:false,scene:{},canvas:{hidden:false},generation:1,actors,currentState:{party:[{id:'vera',hp:10},{id:'rook',hp:40},{id:'fenn',hp:20}]},visibility(){},stage:{},fx:{ring:async where=>{events.push('ring:'+where);}}});
+ const adapter=Object.assign(Object.create(BattleAdapter.prototype),{enabled:true,failed:false,loading:false,scene:{},canvas:{hidden:false},generation:1,actors,currentState:{party:[{id:'vera',hp:10},{id:'rook',hp:40},{id:'fenn',hp:20}]},visibility(){},stage:{reducedMotion:false},fx:{ring:async where=>{events.push('ring:'+where);}}});
  return {adapter,events,actors};
 }
 test('draught visuals follow the recipient and Greenwake follows every living ally',async()=>{
- const previous=globalThis.matchMedia;globalThis.matchMedia=()=>({matches:false});
- try{
-  const {adapter,events,actors}=supportFixture();await adapter.playAction({actorId:'vera',targetId:'rook',action:'potion'});assert.deepEqual(events,['ring:rook','flash:rook']);
-  events.length=0;adapter.currentState.party[1].hp=0;actors.get('rook').alive=false;
-  await adapter.playAction({actorId:'fenn',targetId:'rook',action:'skill'});assert.deepEqual(events,['ring:vera','ring:fenn','flash:vera','flash:fenn']);
- }finally{if(previous===undefined)delete globalThis.matchMedia;else globalThis.matchMedia=previous;}
+ const {adapter,events,actors}=supportFixture();await adapter.playAction({actorId:'vera',targetId:'rook',action:'potion'});assert.deepEqual(events,['ring:rook','flash:rook']);
+ events.length=0;adapter.currentState.party[1].hp=0;actors.get('rook').alive=false;
+ await adapter.playAction({actorId:'fenn',targetId:'rook',action:'skill'});assert.deepEqual(events,['ring:vera','ring:fenn','flash:vera','flash:fenn']);
+});
+
+test('live reduced motion clears camera shake and hides particles while they expire',()=>{
+ const motionPreference={matches:false},camera={position:{x:0,y:0}};
+ const stage=Object.assign(Object.create(Stage.prototype),{motionPreference,camera,tweens:[],time:0,timeScale:1,shake:1,view:{},renderer:{render(){
+  if(motionPreference.matches)assert.deepEqual(camera.position,{x:0,y:0});
+ }}});
+ stage.frame(.1);
+ assert.ok(stage.shake>0);
+ motionPreference.matches=true;
+ stage.frame(.1);
+ assert.equal(stage.shake,0);
+
+ const particle={life:.15,max:.15,x:0,y:0,z:0,vx:0,vy:0,vz:0,g:0,drag:0,s:1,r:1,gc:1,b:1};
+ const fx=Object.assign(Object.create(Fx.prototype),{N:1,p:[particle],pos:[],col:[],size:[],points:{visible:true},geo:{attributes:{position:{},color:{},psize:{}}},live:[]});
+ fx.update(.1,stage.reducedMotion);
+ assert.equal(fx.points.visible,false);
+ fx.update(.1,stage.reducedMotion);
+ motionPreference.matches=false;
+ fx.update(.1,stage.reducedMotion);
+ assert.equal(fx.points.visible,true);
+ assert.equal(fx.size[0],0);
+});
+
+test('reduced motion keeps the hit cue and skips the attack movement',async()=>{
+ const {adapter,actors,events}=supportFixture();
+ adapter.stage.reducedMotion=true;
+ const mage=actors.get('vera');mage.group.position={x:-1,z:1};
+ mage.face=()=>events.push('face');actors.get('rook').group.position={x:1,z:-1};
+ await adapter.playAction({actorId:'vera',targetId:'rook',action:'skill'});
+ assert.deepEqual(events,['face','flash:rook']);
 });
 
 test('render failures release waiting animations and invoke the fallback callback',async()=>{
